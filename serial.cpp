@@ -5,17 +5,19 @@ using namespace std;
 
 void readRollNumbers(FILE *inputFile, int *Numbers, int num)
 {
+    char number[256];
+
+    while (fgets(number, sizeof(inputFile), inputFile) != nullptr) {
+        cout << number;
+    }
 }
 
 int main()
 {
-    string number;
+    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
 
-    ifstream numbers("./assets/numbers.txt");
+    int *numbers;
+    int num;
 
-    while (getline(numbers, number)){
-        cout << number << endl;
-    }
-
-    numbers.close();
+    readRollNumbers(numbersFile, numbers, num);
 }

@@ -15,4 +15,8 @@ int main()
     node<int> *head = new node<int>;
 
     addRollNumbersToList(head, numbers, num);
+
+    head = mergeSort(head);
+
+    printLinkedList(head);
 }

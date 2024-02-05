@@ -11,8 +11,9 @@ public:
 
 	node()
 	{
-		next = NULL;
-	}
+        val = 0;
+        next = NULL;
+    }
 
 	node(T d, node* n)
 	{

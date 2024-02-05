@@ -54,6 +54,94 @@ void insertInList(node<int> *head, int value)
     currentNode->next = newNode;
 }
 
+node<int> *findMid(node<int> *head)
+{
+    node<int> *slow = head;
+    node<int> *fast = head->next;
+
+    while (fast != NULL && fast->next != NULL)
+    {
+        slow = slow->next;
+        fast = (fast->next)->next;
+    }
+
+    // slow is pointing at the middle of the list
+    return slow;
+}
+
+node<int> *merge(node<int> *left, node<int> *right)
+{
+
+    // creating an auxiliary head node storing the
+
+    // the head of the linked list to be returned and
+
+    // another pointer to remember where the last
+
+    // added node was
+    node<int> *dummyHead = new node<int>();
+    node<int> *current = dummyHead;
+
+    while (left != NULL && right != NULL)
+    {
+        if (left->val <= right->val)
+        {
+            current->next = left;
+            left = left->next;
+            current = current->next;
+        }
+        else if (right->val < left->val)
+        {
+            current->next = right;
+            right = right->next;
+            current = current->next;
+        }
+    }
+    while (left != NULL)
+    {
+        current->next = left;
+        left = left->next;
+        current = current->next;
+    }
+    while (right != NULL)
+    {
+        current->next = right;
+        right = right->next;
+        current = current->next;
+    }
+    return dummyHead->next;
+}
+
+void printLinkedList(node<int> *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->val << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+node<int> *mergeSort(node<int> *head)
+{
+    if (head->next == NULL)
+    {
+        return head;
+    }
+
+    node<int> *mid = findMid(head);
+    node<int> *startOfRight = mid->next;
+
+    mid->next = NULL;
+
+    node<int> *left = mergeSort(head);
+    node<int> *right = mergeSort(startOfRight);
+
+    node<int> *newHead = merge(left, right);
+
+    return newHead;
+}
+
 void addRollNumbersToList(node<int> *head, int *Numbers, int num)
 {
     // insert first element at head

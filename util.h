@@ -19,7 +19,7 @@ void printIntArray(const int *arr, size_t size)
 {
     for (size_t i = 0; i < size; ++i)
     {
-        cout << arr[i] << std::endl;
+        cout << arr[i] << endl;
     }
 }
 
@@ -71,14 +71,6 @@ node<int> *findMid(node<int> *head)
 
 node<int> *merge(node<int> *left, node<int> *right)
 {
-
-    // creating an auxiliary head node storing the
-
-    // the head of the linked list to be returned and
-
-    // another pointer to remember where the last
-
-    // added node was
     node<int> *dummyHead = new node<int>();
     node<int> *current = dummyHead;
 
@@ -122,6 +114,29 @@ void printLinkedList(node<int> *head)
     cout << endl;
 }
 
+void writeResultToFile(node<int> *head, const string &filename)
+{
+    ofstream outFile(filename);
+
+    if (!outFile.is_open())
+    {
+        cerr << "Error: Couldn't open the file " << filename << " for writing.\n";
+        return;
+    }
+
+    node<int> *curr = head;
+
+    while (curr != nullptr)
+    {
+        outFile << curr->val << "\n";
+        curr = curr->next;
+    }
+
+    outFile.close();
+
+    cout << "Results written to file successfully" << endl;
+}
+
 node<int> *mergeSort(node<int> *head)
 {
     if (head->next == NULL)
@@ -153,4 +168,23 @@ void addRollNumbersToList(node<int> *head, int *Numbers, int num)
     {
         insertInList(head, Numbers[i]);
     }
+}
+
+void writeNumbersToFile(const string &filename)
+{
+    ofstream outFile(filename);
+
+    if (!outFile.is_open())
+    {
+        cerr << "Error: Couldn't open the file " << filename << " for writing.\n";
+        return;
+    }
+
+    // Write 100000 random numbers separated by newlines
+    for (int i = 0; i < 1000; ++i)
+    {
+        outFile << rand() % 10000 << '\n';
+    }
+
+    outFile.close();
 }

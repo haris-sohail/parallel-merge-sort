@@ -5,6 +5,7 @@ using namespace std;
 
 int main()
 {
+    writeNumbersToFile("./assets/numbers.txt");
     FILE *numbersFile = fopen("./assets/numbers.txt", "r");
 
     int *numbers = new int[1000];
@@ -18,5 +19,7 @@ int main()
 
     head = mergeSort(head);
 
-    printLinkedList(head);
+    // printLinkedList(head);
+
+    writeResultToFile(head, "./assets/result.txt");
 }

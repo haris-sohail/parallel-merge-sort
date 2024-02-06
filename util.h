@@ -1,8 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <pthread.h>
 #include "node.h"
+#include <mutex>
+#include "threadInfo.h"
 using namespace std;
+
+mutex listMutex;
 
 size_t getArraySize(const int *arr)
 {
@@ -181,10 +186,106 @@ void writeNumbersToFile(const string &filename)
     }
 
     // Write 100000 random numbers separated by newlines
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 100000; ++i)
     {
         outFile << rand() % 10000 << '\n';
     }
 
     outFile.close();
+}
+
+void executeSerial()
+{
+    writeNumbersToFile("./assets/numbers.txt");
+    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
+
+    int *numbers = new int[100000];
+    int num;
+
+    readRollNumbers(numbersFile, numbers, num);
+
+    node<int> *head = new node<int>;
+
+    addRollNumbersToList(head, numbers, num);
+
+    delete[] numbers;
+
+    head = mergeSort(head);
+
+    // printLinkedList(head);
+
+    writeResultToFile(head, "./assets/result.txt");
+}
+
+void *addRollNumbersToListParallel(void *arg)
+{
+    threadInfo *threadInfoObj = (threadInfo *)arg;
+
+    FILE *inputFile = threadInfoObj->numbersFile;
+    node<int> *head = threadInfoObj->head;
+    char number[256];
+    string number_in_String;
+    int numberI;
+
+    while (fgets(number, sizeof(inputFile), inputFile) != nullptr)
+    {
+        number_in_String = number;
+        numberI = stoi(number_in_String);
+
+        listMutex.lock();
+
+        insertInList(head, numberI);
+
+        listMutex.unlock();
+    }
+}
+
+void createThreads(node<int> *head, FILE *numbersFile)
+{
+    threadInfo threadInfo;
+
+    threadInfo.head = head;
+
+    threadInfo.numbersFile = numbersFile;
+
+    pthread_t input[4];
+
+    pthread_attr_t atr;
+
+    pthread_attr_init(&atr);
+
+    // making thread joinable
+    pthread_attr_setdetachstate(&atr, PTHREAD_CREATE_JOINABLE);
+
+    for (int i = 0; i <= 4; i++)
+    {
+        pthread_create(&input[i], &atr, addRollNumbersToListParallel, &threadInfo);
+    }
+
+    for (int i = 0; i <= 4; i++)
+    {
+        pthread_join(input[i], NULL);
+    }
+}
+
+void removeAtHead(node<int> *&head)
+{
+    node<int> *temp = head;
+    head = head->next;
+
+    delete temp;
+}
+
+void executeParallel()
+{
+    node<int> *head = new node<int>;
+    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
+
+    writeNumbersToFile("./assets/numbers.txt");
+
+    createThreads(head, numbersFile);
+
+    removeAtHead(head); // head contains a redundant 0
+
+    // writeResultToFile(head, "./assets/result.txt");
 }

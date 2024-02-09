@@ -2,9 +2,8 @@
 The famous merge sort algorithm's parallel version
 
 # Working
-## Serial function `executeSerial()`
-
 ![alt text](https://github.com/haris-sohail/parallel-merge-sort/blob/main/assets/merge_sort.png)
+## Serial function `executeSerial()`
 
 - Read a list of numbers from file and store them in an array
 - Insert the individual numbers into a linked list,

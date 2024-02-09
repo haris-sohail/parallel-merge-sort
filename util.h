@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include <string>
 #include <pthread.h>
 #include "node.h"
@@ -187,35 +188,12 @@ void writeNumbersToFile(const string &filename)
     }
 
     // Write random numbers separated by newlines
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 100000; ++i)
     {
         outFile << rand() % 10000 << '\n';
     }
 
     outFile.close();
-}
-
-void executeSerial()
-{
-    writeNumbersToFile("./assets/numbers.txt");
-    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
-
-    int *numbers = new int[100000];
-    int num;
-
-    readRollNumbers(numbersFile, numbers, num);
-
-    node<int> *head = new node<int>;
-
-    addRollNumbersToList(head, numbers, num);
-
-    delete[] numbers;
-
-    head = mergeSort(head);
-
-    // printLinkedList(head);
-
-    writeResultToFile(head, "./assets/result.txt");
 }
 
 void *addRollNumbersToListParallel(void *arg)
@@ -611,8 +589,18 @@ node<int> *mergeSortParallel(node<int> *head)
     return newHead;
 }
 
+auto measureStartTime()
+{
+    // Measure the start time
+    auto startTime = chrono::high_resolution_clock::now();
+
+    return startTime;
+}
+
 void executeParallel()
 {
+    auto startTime = measureStartTime();
+
     int *numbers = new int[100000];
     int num;
     node<int> *head = new node<int>;
@@ -636,4 +624,43 @@ void executeParallel()
     // printLinkedList(head);
 
     writeResultToFile(head, "./assets/result.txt");
+
+    // Measure the end time
+    auto endTime = chrono::high_resolution_clock::now();
+
+    auto duration = chrono::duration_cast<chrono::milliseconds>(endTime - startTime);
+
+    cout << "Parallel Merge Sort Execution Time: " << duration.count() << " milliseconds" << endl;
+}
+
+void executeSerial()
+{
+    auto startTime = measureStartTime();
+
+    writeNumbersToFile("./assets/numbers.txt");
+    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
+
+    int *numbers = new int[100000];
+    int num;
+
+    readRollNumbers(numbersFile, numbers, num);
+
+    node<int> *head = new node<int>;
+
+    addRollNumbersToList(head, numbers, num);
+
+    delete[] numbers;
+
+    head = mergeSort(head);
+
+    // printLinkedList(head);
+
+    writeResultToFile(head, "./assets/result.txt");
+
+    // Measure the end time
+    auto endTime = chrono::high_resolution_clock::now();
+
+    auto duration = chrono::duration_cast<chrono::milliseconds>(endTime - startTime);
+
+    cout << "Serial Merge Sort Execution Time: " << duration.count() << " milliseconds" << endl;
 }

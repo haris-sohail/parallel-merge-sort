@@ -5,7 +5,7 @@ using namespace std;
 
 int main()
 {
-    // executeSerial();
+    executeSerial();
 
     executeParallel();
 }

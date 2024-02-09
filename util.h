@@ -187,7 +187,7 @@ void writeNumbersToFile(const string &filename)
     }
 
     // Write random numbers separated by newlines
-    for (int i = 0; i < 100000; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         outFile << rand() % 10000 << '\n';
     }

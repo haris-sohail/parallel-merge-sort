@@ -186,7 +186,7 @@ void writeNumbersToFile(const string &filename)
     }
 
     // Write 100000 random numbers separated by newlines
-    for (int i = 0; i < 100000; ++i)
+    for (int i = 0; i < 1000; ++i)
     {
         outFile << rand() % 10000 << '\n';
     }
@@ -210,7 +210,7 @@ void executeSerial()
 
     delete[] numbers;
 
-    head = mergeSort(head);
+    // head = mergeSort(head);
 
     // printLinkedList(head);
 
@@ -220,33 +220,78 @@ void executeSerial()
 void *addRollNumbersToListParallel(void *arg)
 {
     threadInfo *threadInfoObj = (threadInfo *)arg;
-
-    FILE *inputFile = threadInfoObj->numbersFile;
+    int start = threadInfoObj->start;
+    int end = threadInfoObj->end;
     node<int> *head = threadInfoObj->head;
-    char number[256];
-    string number_in_String;
-    int numberI;
+    int *Numbers = threadInfoObj->numbersArray;
 
-    while (fgets(number, sizeof(inputFile), inputFile) != nullptr)
+    for (int i = start; i < end; i++)
     {
-        number_in_String = number;
-        numberI = stoi(number_in_String);
-
-        listMutex.lock();
-
-        insertInList(head, numberI);
-
-        listMutex.unlock();
+        insertInList(head, Numbers[i]);
     }
 }
 
-void createThreads(node<int> *head, FILE *numbersFile)
+void setAffinity(pthread_t thread, int coreId)
 {
-    threadInfo threadInfo;
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(coreId, &cpuset);
 
-    threadInfo.head = head;
+    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0)
+    {
+        perror("pthread_setaffinity_np");
+    }
+}
 
-    threadInfo.numbersFile = numbersFile;
+void setThreadInfo(threadInfo *&threadInfoArray, int *Numbers)
+{
+    // set head and numbers file
+    FILE *numbersFile = fopen("./assets/numbers.txt", "r");
+
+    node<int> **heads = new node<int> *[4];
+
+    // Initialize each head node
+    for (int i = 0; i < 4; ++i)
+    {
+        heads[i] = new node<int>;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        threadInfoArray[i].head = heads[i];
+        threadInfoArray[i].numbersFile = numbersFile;
+        threadInfoArray[i].numbersArray = Numbers;
+    }
+
+    int arraySize = getArraySize(Numbers);
+    int portion = arraySize / 4;
+
+    // divide the numbers array into four portions using start and end portion
+    for (int i = 0; i < 4; i++)
+    {
+        threadInfoArray[i].start = i * portion;
+        threadInfoArray[i].end = (i == 4 - 1) ? arraySize : (i + 1) * portion;
+    }
+}
+
+node<int>* mergeLists(node<int>* list1, node<int>* list2) {
+    if (list1 == nullptr) return list2;
+    if (list2 == nullptr) return list1;
+
+    node<int>* mergedHead = nullptr;
+    if (list1->val <= list2->val) {
+        mergedHead = list1;
+        mergedHead->next = mergeLists(list1->next, list2);
+    } else {
+        mergedHead = list2;
+        mergedHead->next = mergeLists(list1, list2->next);
+    }
+    return mergedHead;
+}
+
+void createThreads(node<int> *head, FILE *numbersFile, int *Numbers)
+{
+    threadInfo *threadInfoArray = new threadInfo[4];
 
     pthread_t input[4];
 
@@ -257,14 +302,22 @@ void createThreads(node<int> *head, FILE *numbersFile)
     // making thread joinable
     pthread_attr_setdetachstate(&atr, PTHREAD_CREATE_JOINABLE);
 
+    setThreadInfo(threadInfoArray, Numbers);
+
     for (int i = 0; i <= 4; i++)
     {
-        pthread_create(&input[i], &atr, addRollNumbersToListParallel, &threadInfo);
+        pthread_create(&input[i], &atr, addRollNumbersToListParallel, &threadInfoArray[i]);
+        setAffinity(input[i], i);
     }
 
     for (int i = 0; i <= 4; i++)
     {
         pthread_join(input[i], NULL);
+    }
+
+    // join all linked lists to make one
+    for (int i = 0; i < 4; i++){
+        mergeLists(head, threadInfoArray[i].head);
     }
 }
 
@@ -276,16 +329,29 @@ void removeAtHead(node<int> *&head)
     delete temp;
 }
 
+void* mergeSortParallel(void* arg){
+    
+}
+
 void executeParallel()
 {
+    int *numbers = new int[100000];
+    int num;
     node<int> *head = new node<int>;
     FILE *numbersFile = fopen("./assets/numbers.txt", "r");
 
     writeNumbersToFile("./assets/numbers.txt");
 
-    createThreads(head, numbersFile);
+    readRollNumbers(numbersFile, numbers, num);
 
-    removeAtHead(head); // head contains a redundant 0
+    createThreads(head, numbersFile, numbers);
 
-    // writeResultToFile(head, "./assets/result.txt");
+    // head contains redundant zeros
+    removeAtHead(head); 
+    removeAtHead(head); 
+    removeAtHead(head); 
+    removeAtHead(head); 
+    removeAtHead(head); 
+    
+    writeResultToFile(head, "./assets/result.txt");
 }

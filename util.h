@@ -177,7 +177,7 @@ void addRollNumbersToList(node<int> *head, int *Numbers, int num)
     }
 }
 
-void writeNumbersToFile(const string &filename)
+void writeNumbersToFile(const string &filename, int numbersSize)
 {
     ofstream outFile(filename);
 
@@ -188,7 +188,7 @@ void writeNumbersToFile(const string &filename)
     }
 
     // Write random numbers separated by newlines
-    for (int i = 0; i < 100000; ++i)
+    for (int i = 0; i < numbersSize; ++i)
     {
         outFile << rand() % 10000 << '\n';
     }
@@ -606,7 +606,7 @@ void executeParallel()
     node<int> *head = new node<int>;
     FILE *numbersFile = fopen("./assets/numbers.txt", "r");
 
-    writeNumbersToFile("./assets/numbers.txt");
+    writeNumbersToFile("./assets/numbers.txt", 100000);
 
     readRollNumbers(numbersFile, numbers, num);
 
@@ -637,7 +637,7 @@ void executeSerial()
 {
     auto startTime = measureStartTime();
 
-    writeNumbersToFile("./assets/numbers.txt");
+    writeNumbersToFile("./assets/numbers.txt", 100000);
     FILE *numbersFile = fopen("./assets/numbers.txt", "r");
 
     int *numbers = new int[100000];

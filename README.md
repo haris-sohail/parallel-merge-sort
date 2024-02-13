@@ -1,6 +1,31 @@
 # parallel-merge-sort
 The famous merge sort algorithm's parallel version
 
+## Compiling and Running the Program
+
+To compile the `main.cpp` file and run the program, follow these steps:
+
+1. Open a terminal window.
+2. Navigate to the directory containing the `main.cpp` file.
+3. Run the following command to compile the program:
+
+    ```bash
+    g++ -g main.cpp -o program
+    ```
+
+   This command compiles the `main.cpp` file and generates an executable named `program`.
+
+4. After successful compilation, execute the program by running the following command:
+
+    ```bash
+    ./program
+    ```
+
+   This command executes the compiled program, allowing you to observe its behavior.
+
+Make sure you have `g++` installed on your system. If not, you can install it by following the instructions provided for your operating system.
+
+
 # Working
 ![alt text](https://github.com/haris-sohail/parallel-merge-sort/blob/main/assets/merge_sort.png)
 ## Serial function `executeSerial()`
